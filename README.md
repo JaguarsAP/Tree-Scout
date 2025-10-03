@@ -13,9 +13,11 @@ Data:
   - Deforestation hotspots (daily confidence-scored alerts)
   - Cumulative forest change (loss − gain over multi-year spans)
 
+  We plan on using both tree cover loss and tree cover gain as our primary statistics. We are going to be predicting Tree cover loss since 2020 for loss with >10% canopy capacity.
+  
 Modeling:
-  In terms pf modeling the data, we have not yet determined the best way to do this yet. However, based on the direction the class is trending, it is likely going to be a combination of clustering and fitting a linear model for predictions.
-
+  In terms pf modeling the data, we have not yet determined the best way to do this yet. However, based on the direction the class is trending, it is likely going to be a combination of clustering and fitting a linear model for predictions, probably using K-means.
+  
 Visualization: 
   For this, I have some experience in making interactive plots, and so that's likely what we'll go with. Anthony has made a website in the past, so we'll probably do an interactive plot in a website.
 
