@@ -24,7 +24,7 @@ Visualization:
 Testing:
   Since we're training a predictive model, it's likely that we won't be able to use this year's data. In general, deforestation takes a long time, so we'll probably be using data from the last decade and before. By not using the data from ths year, we have data to test against.
 
-
+![Midterm Video](https://youtu.be/Nrnz_eqOdqE)
 
 
   
