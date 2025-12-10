@@ -140,17 +140,6 @@ The pipeline produces:
 
 I'm working with 1 partner, Anthony Hardimon. Together, we are monitoring the rate of deforestation in the U.S. to predict which counties are most likely to experience tree cover loss.
 
-## Data
-
-We use data from the **Global Forest Watch (GFW)** API, which tracks deforestation statistics including:
-- Tree cover loss (annual hectares lost)
-- Tree cover gain (annual hectares gained)  
-- Primary forest loss (GLAD-S2 alerts)
-- Deforestation hotspots (daily confidence-scored alerts)
-- Cumulative forest change (loss − gain over multi-year spans)
-
-We predict tree cover loss since 2010 for loss with >10% canopy capacity.
-
 ## Modeling
 
 We use a **Random Forest Regressor** with:
