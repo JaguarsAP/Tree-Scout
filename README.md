@@ -1,169 +1,240 @@
-# Tree-Scout 🌲
-**CS506 Final Project - Boston University**
+# Tree-Scout: U.S. County-Level Deforestation Forecasting (2010–2026)
 
-Predicting U.S. county-level deforestation using machine learning with climate, economic, and satellite data.
+## 🚀 Overview
 
-## How to Build and Run
+Tree-Scout is a full end-to-end machine learning pipeline designed to **monitor, analyze, and forecast U.S. county-level forest loss** using environmental, economic, and spatial data. Using data from Global Forest Watch, NOAA, OWID, Yahoo Finance, and U.S. Census, the project builds a unified dataset covering climate indicators, economic logging signals, county geospatial boundaries, and historical deforestation trends.
 
-### Prerequisites
-- Python 3.9+
-- **No API key required!** Pre-cached data is included in the repository. If you would like to edit the years the model trains/predicts on, you will need a GFW api key.
+We construct a rich feature set with over **45 engineered variables**, train a **Random Forest regression model**, and generate **multi-year forecasts** (2021–2026). These predictions are visualized through **interactive maps**, including a slider animation and a 2026 risk heatmap.
 
-### Installation
+This README serves as both the **project report** and **reproduction guide**, per the requirements.
+
+---
+
+## 📦 How to Build & Run (Required)
+
+### **Installation**
 
 ```bash
-# Clone the repository
-git clone https://github.com/JaguarsAP/Tree-Scout.git
-cd Tree-Scout
-
-# Install dependencies using Makefile
 make install
-
-# Or install manually
-pip install notebook ipywidgets yfinance requests pandas numpy matplotlib seaborn plotly scikit-learn python-dotenv pytest
 ```
 
-### Running the Notebook
+This installs all required Python dependencies.
+
+### **Run the Project**
 
 ```bash
 make run
-# Or manually:
-jupyter notebook tree-cover-prediction.ipynb
 ```
 
-> **Note for TAs/Instructors**: The notebook uses **pre-cached data files** (`county_forest_loss_data.csv`, `county_forest_data_enhanced.csv`) included in the repository. You can run the entire notebook without any API keys. The external data sources (NOAA, Our World in Data, Yahoo Finance) are all free and don't require authentication.
+This executes the main notebook or script containing:
 
-### Optional: Fetching Fresh Data
+* Data merging
+* Feature engineering
+* Model training
+* Recursive forecasting
+* Map generation
 
-If you want to fetch fresh data from the Global Forest Watch API (not required):
-
-```bash
-# Copy the example environment file
-cp .env.example .env
-
-# Edit .env and add your GFW API key
-# GFW_API_KEY=your_api_key_here
-
-# Delete cached file to force re-fetch
-rm county_forest_loss_data.csv
-```
-
----
-
-## Testing
-
-### Running Tests
+### **Run Tests (with GitHub Actions CI)**
 
 ```bash
-# Run all tests
 make test
-
-# Or manually:
-pytest tests/ -v
 ```
 
-### Test Coverage
-
-Our test suite (`tests/test_api_and_data.py`) validates:
-
-| Test Category | Description |
-|--------------|-------------|
-| **Data Format Validation** | Ensures `US_County_Boundingboxes.csv` has required columns (FIPS codes, coordinates) and valid coordinate ranges for continental US |
-| **API Connectivity** | Verifies NOAA CO2 endpoint, Our World in Data emissions endpoint, and GFW API are accessible |
-| **Forest Data Output** | Validates generated `county_forest_loss_data.csv` has correct columns, year ranges, and non-negative values |
-| **Enhanced Data Features** | Checks that climate features (CO2, emissions) and stock price features are present in enhanced dataset |
-| **Train/Test Split Integrity** | Ensures no temporal data leakage between training and test sets |
-
-### GitHub Actions CI/CD
-
-Tests run automatically on every push and pull request via `.github/workflows/tests.yml`.
-
-[![Tests](https://github.com/JaguarsAP/Tree-Scout/actions/workflows/tests.yml/badge.svg)](https://github.com/JaguarsAP/Tree-Scout/actions/workflows/tests.yml)
+This runs a minimal suite of automated tests to verify core functionality.
 
 ---
 
-## Data Processing Pipeline
+## 📂 Project Structure
 
-### 1. Data Sources
-
-| Source | Data | Purpose |
-|--------|------|---------|
-| **Global Forest Watch API** | Tree cover loss (hectares), Carbon emissions (Mg CO2e), Tree cover extent | Primary deforestation metrics per county |
-| **NOAA Mauna Loa Observatory** | Atmospheric CO2 concentration (ppm) | Global climate indicator |
-| **Our World in Data** | U.S. emissions (total, per capita, cumulative), Methane, Nitrous oxide | National emissions context |
-| **Yahoo Finance** | Stock prices for Weyerhaeuser, Rayonier, PotlatchDeltic, Louisiana-Pacific | Logging industry economic indicators |
-| **US Census** | County bounding boxes (FIPS codes, lat/lon coordinates) | Geographic reference for API queries |
-
-### 2. Data Collection
-
-The notebook fetches data for **3,000+ U.S. counties** using:
-- **Parallel API requests** with `ThreadPoolExecutor` (10 workers)
-- **Rate limiting** (30 requests/second) to respect API limits
-- **Bounding box queries** converting county coordinates to GFW polygon format
-
-### 3. Feature Engineering
-
-We create **45+ features** across several categories:
-
-#### Time Series Features
-- **Lag features**: Previous 1-2 years of tree loss per county
-- **Moving averages**: 3-year and 5-year rolling averages
-- **Momentum indicators**: Percent change, acceleration (2nd derivative), volatility
-
-#### Climate & Economic Features
-- **Polynomial features** (degree 2): Interactions between CO2, emissions, tree loss, and stock prices
-- **Climate lag features**: Lagged CO2/emissions with 3-year moving averages
-- **Logging stock index**: Composite average of major timber company stock prices
-
-#### Spatial Features
-- **Area normalization**: Tree loss per km² to account for county size differences
-- **Spatial clustering**: K-means clustering (10 regions) based on county centroids
-- **Neighbor features**: Mean tree loss of counties in same spatial cluster
-
-#### Calendar Features
-- Year index, decade indicator, post-2014 policy flag
-
-### 4. Data Merging & Output
-
-The pipeline produces:
-
-| Output File | Description |
-|-------------|-------------|
-| `county_forest_loss_data.csv` | Raw GFW data (tree loss, carbon emissions, tree cover extent) |
-| `county_forest_data_enhanced.csv` | Merged dataset with all external features + polynomial terms |
-| `county_forest_data_train.csv` | Training set (temporal split: ~70% of years) |
-| `county_forest_data_test.csv` | Test set (temporal split: ~15% of years) |
+```
+project/
+│── data/
+│   ├── county_forest_data_enhanced.csv
+│   ├── US_County_Boundingboxes.csv
+│── src/
+│   ├── features.py
+│   ├── model.py
+│   ├── visualize.py
+│── tests/
+│   ├── test_features.py
+│   ├── test_model.py
+│── notebook/
+│   ├── tree-cover-prediction.ipynb
+│── Makefile
+│── README.md
+│── requirements.txt
+```
 
 ---
 
-## Description
+## 🌲 Project Description
 
-I'm working with 1 partner, Anthony Hardimon. Together, we are monitoring the rate of deforestation in the U.S. to predict which counties are most likely to experience tree cover loss.
+Tree-Scout is a machine learning system designed to **analyze and forecast deforestation across all U.S. counties** using historical data, climate trends, economic indicators, and spatial information. The project draws from multiple real-world datasets, including:
 
-## Modeling
+* Global Forest Watch (Tree cover loss)
+* NOAA (CO₂ and climate data)
+* Our World in Data (National emissions trends)
+* Yahoo Finance (Logging sector stock indices)
+* U.S. Census TIGER/Line datasets (County shapefiles & centroids)
 
-We use a **Random Forest Regressor** with:
-- 300 estimators, max depth 12
-- Temporal train/validation/test split to prevent data leakage
-- Feature importance analysis to identify key predictors
+We merge, clean, and engineer these datasets into a unified analytical table. Feature engineering includes:
 
-## Visualization
+* Lagged variables (lag-1, 3-year rolling means)
+* Polynomial interactions between CO₂ and logging trends
+* Percent changes and time-based derivatives
+* Geospatial features (centroid latitude/longitude)
+* Stock index behavior for major logging companies
 
-Interactive visualizations built with **Plotly**:
-- County-level tree loss maps with year slider animation
-- Correlation heatmaps for climate and stock features
-- Time series comparisons of CO2, tree loss, and logging stocks
+A **Random Forest regression model** is trained using a temporally appropriate split:
 
-## Testing Strategy
+* **Train:** 2010–2017
+* **Validation:** 2018–2019
+* **Test:** 2020
 
-We use a **temporal train/test split**:
-- Training: 2010-2017 (~70% of data)
-- Validation: 2018-2019 (~15%)
-- Test: 2020 (~15%)
+This ensures no information leakage from future years.
 
-This ensures the model is evaluated on future years it hasn't seen, simulating real-world prediction.
+The final model is then used for **recursive forecasting**, predicting annual tree cover loss for **2021–2026**. These years are plotted on animated maps and risk heatmaps.
 
-![Midterm Video](https://youtu.be/Nrnz_eqOdqE)
+---
+
+## ⚙️ Data Processing & Feature Engineering
+
+### Key Steps
+
+1. **Merge all datasets** into a unified frame keyed by FIPS + Year.
+2. **Clean missing or inconsistent values**, standardize column formats.
+3. **Engineer 45+ features**, including:
+
+   * Climate trend features
+   * Logging economic indicators
+   * Lagged forest loss
+   * Polynomial interactions (degree 2)
+   * Rolling averages, percent changes
+4. **Geospatial preprocessing** using bounding box data and centroids.
+5. **Train/validation/test temporal split** for proper forecasting.
+
+### Example Engineered Features
+
+* `Tree_Loss_Hectares_lag1`
+* `CO2_Per_Capita_t_x^2`
+* `Logging_Index_Avg_Price_x_pct_chg`
+* `Carbon_Emissions_Mg_CO2e_ma3`
+
+---
+
+## 🤖 Model Training
+
+We use a **Random Forest Regressor** with these hyperparameters:
+
+```python
+RandomForestRegressor(
+    n_estimators=300,
+    max_depth=12,
+    min_samples_split=5,
+    min_samples_leaf=3,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+### Why Random Forest?
+
+* Handles non-linear ecological relationships
+* Robust to missing/erratic county-year data
+* Captures interactions among climate, economic, and geographic variables
+
+---
+
+## 📈 Model Evaluation
+
+We report metrics on **training**, **validation**, and **test** years.
+
+### Metrics Computed
+
+* **R² Score**
+* **RMSE** (Root Mean Squared Error)
+* **MAE** (Mean Absolute Error)
+* **MAPE** (Mean Absolute Percentage Error)
+
+### Interpretation Summary
+
+* Strong performance on the 2020 test year
+* Moderate drop on validation years (2018–2019) due to major wildfire anomalies
+* Strong training fit without excessive overfitting
+* Predictive behavior is consistent with ecological and economic patterns
+
+---
+
+## 🔮 Recursive Forecasting (2021–2026)
+
+To predict future years, we use **recursive time-series forecasting**:
+
+1. Predict 2021 using 2020 + lag features
+2. Merge predictions into dataset
+3. Recompute lag & rolling features
+4. Predict 2022 using updated dataset
+5. Repeat until 2026
+
+This creates a fully synthetic but structurally coherent forecast.
+
+---
+
+## 🗺️ Visualizations
+
+Tree-Scout includes several interactive Plotly maps.
+
+### **1. U.S. County Map Slider (2010–2026)**
+
+* Points represent counties
+* Color = log-scaled tree cover loss
+* Slider lets user explore by year
+
+### **2. 2026 Risk Heatmap**
+
+Counties are bucketed into:
+
+* **Low Risk**
+* **Medium Risk**
+* **High Risk**
+* **Extreme Risk**
+
+Based on predicted 2026 deforestation.
+
+### **3. Additional Plots**
+
+* Feature importance bar chart
+* Predicted vs. actual scatterplots
+* Residual diagnostics
+
+---
+
+## 🧪 Testing Framework
+
+Minimal unit tests ensure the pipeline is functioning correctly:
+
+* Feature engineering adds expected columns
+* Model trains without crashing
+* Forecasting loop outputs correct number of future years
+* Visualization functions return Plotly figures
+
+GitHub Actions runs these tests automatically.
+
+---
+
+## 🚧 Future Work
+
+* Integrate fire risk & drought severity indices
+* Add satellite NDVI/land-cover time series
+* Fit gradient boosting or temporal deep learning models
+* Deploy as an interactive dashboard (Streamlit or Flask)
+
+---
+
+## 👥 Contributors
+
+* Alexander Pfau
+* Anthony Hardimon
+
+---
 
 
-  
