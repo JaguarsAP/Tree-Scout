@@ -10,7 +10,7 @@ This README serves as both the **project report** and **reproduction guide**, pe
 
 ---
 
-![Final Video Link](https://youtu.be/30nhpM2RZ0g)
+[Final Video Link](https://youtu.be/30nhpM2RZ0g)
 
 ## 📦 How to Build & Run (Required)
 
